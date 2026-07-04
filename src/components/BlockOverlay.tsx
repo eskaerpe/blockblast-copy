@@ -2,25 +2,25 @@ import type { BlockShape } from '../game/types';
 
 interface BlockOverlayProps {
   block: BlockShape;
+  cellSize: number;
 }
 
-export function BlockOverlay({ block }: BlockOverlayProps) {
+export function BlockOverlay({ block, cellSize }: BlockOverlayProps) {
   const minRow = Math.min(...block.cells.map((c) => c.row));
   const maxRow = Math.max(...block.cells.map((c) => c.row));
   const minCol = Math.min(...block.cells.map((c) => c.col));
   const maxCol = Math.max(...block.cells.map((c) => c.col));
   const rows = maxRow - minRow + 1;
   const cols = maxCol - minCol + 1;
+  const gap = Math.max(1, cellSize * 0.04);
 
   return (
     <div
       className="grid opacity-90 pointer-events-none"
       style={{
-        gridTemplateColumns: `repeat(${cols}, 1fr)`,
-        gridTemplateRows: `repeat(${rows}, 1fr)`,
-        gap: '1px',
-        width: `${cols * 24}px`,
-        height: `${rows * 24}px`,
+        gridTemplateColumns: `repeat(${cols}, ${cellSize}px)`,
+        gridTemplateRows: `repeat(${rows}, ${cellSize}px)`,
+        gap: `${gap}px`,
       }}
     >
       {Array.from({ length: rows }, (_, r) =>
@@ -31,8 +31,10 @@ export function BlockOverlay({ block }: BlockOverlayProps) {
           return (
             <div
               key={`${r}-${c}`}
-              className="aspect-square rounded-sm"
+              className="rounded-sm"
               style={{
+                width: `${cellSize}px`,
+                height: `${cellSize}px`,
                 background: occupied ? block.color : 'transparent',
               }}
             />

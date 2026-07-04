@@ -23,6 +23,8 @@ export function Game() {
   const [activeBlock, setActiveBlock] = useState<BlockShape | null>(null);
   const [activeBlockIdx, setActiveBlockIdx] = useState<number>(-1);
   const [hoveredCell, setHoveredCell] = useState<{ row: number; col: number } | null>(null);
+  const [cellSize, setCellSize] = useState(40);
+  const boardContainerRef = useRef<HTMLDivElement>(null);
 
   const board = useGameStore((s) => s.board);
   const dock = useGameStore((s) => s.dock);
@@ -46,6 +48,20 @@ export function Game() {
   useEffect(() => {
     init();
   }, [init]);
+
+  // Measure board cell size
+  useEffect(() => {
+    const el = boardContainerRef.current;
+    if (!el) return;
+    const measure = () => {
+      const rect = el.getBoundingClientRect();
+      setCellSize(rect.width / 8);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   // Sound effects
   useEffect(() => {
@@ -172,15 +188,15 @@ export function Game() {
 
       {/* Board */}
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
-        <div data-board>
+        <div data-board ref={boardContainerRef}>
           <Board board={board} hoveredCell={hoveredCell} activeBlock={activeBlock} clearingCells={clearingCells} />
         </div>
 
         {/* Dock */}
-        <Dock dock={dock} />
+        <Dock dock={dock} cellSize={cellSize} />
 
         <DragOverlay dropAnimation={null}>
-          {activeBlock ? <BlockOverlay block={activeBlock} /> : null}
+          {activeBlock ? <BlockOverlay block={activeBlock} cellSize={cellSize} /> : null}
         </DragOverlay>
       </DndContext>
 
