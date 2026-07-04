@@ -7,7 +7,6 @@ import {
   useSensor,
   useSensors,
   type DragStartEvent,
-  type DragEndEvent,
   type DragOverEvent,
   type DragCancelEvent,
 } from '@dnd-kit/core';
@@ -183,26 +182,16 @@ export function Game() {
   }, []);
 
   const handleDragEnd = useCallback(
-    (event: DragEndEvent) => {
+    () => {
       const block = drag.activeBlock;
       const blockIdx = drag.activeBlockIdx;
-      const { over } = event;
+      const anchor = drag.anchorCell;
       endDrag();
 
-      if (!over || blockIdx < 0 || !block) return;
-      const overId = String(over.id);
-      const match = overId.match(/^cell-(\d+)-(\d+)$/);
-      if (!match) return;
-
-      // Center the drop on the cursor just like the preview
-      const cellRow = parseInt(match[1], 10);
-      const cellCol = parseInt(match[2], 10);
-      const off = blockAnchorOffset(block);
-      const row = cellRow - off.row;
-      const col = cellCol - off.col;
-      tryPlaceBlock(blockIdx, row, col);
+      if (!anchor || blockIdx < 0 || !block) return;
+      tryPlaceBlock(blockIdx, anchor.row, anchor.col);
     },
-    [drag.activeBlockIdx, drag.activeBlock, tryPlaceBlock, endDrag]
+    [drag.activeBlockIdx, drag.activeBlock, drag.anchorCell, tryPlaceBlock, endDrag]
   );
 
   const handleDragCancel = useCallback(
@@ -255,7 +244,7 @@ export function Game() {
 
         <Dock dock={dock} cellSize={cellSize} />
 
-        <DragOverlay dropAnimation={null}>
+        <DragOverlay dropAnimation={null} style={{ width: 'auto', height: 'auto' }}>
           {drag.activeBlock ? (
             <div style={{ transform: 'translate(-50%, -50%)' }}>
               <BlockOverlay block={drag.activeBlock} cellSize={Math.max(12, cellSize)} />

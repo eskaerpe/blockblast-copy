@@ -7,18 +7,22 @@ function DockBlock({ block, index, cellSize }: { block: BlockShape; index: numbe
     data: { block, index },
   });
 
-  const style = transform
-    ? { transform: `translate(${transform.x}px, ${transform.y}px)`, zIndex: 50 }
-    : undefined;
-
   const minRow = Math.min(...block.cells.map((c) => c.row));
   const maxRow = Math.max(...block.cells.map((c) => c.row));
   const minCol = Math.min(...block.cells.map((c) => c.col));
   const maxCol = Math.max(...block.cells.map((c) => c.col));
   const rows = maxRow - minRow + 1;
   const cols = maxCol - minCol + 1;
-  const s = Math.max(12, Math.min(cellSize * 0.55, 28));
-  const gap = Math.max(1, cellSize * 0.03);
+
+  // When dragging, scale to 100% board cell size so @dnd-kit tracks the correct bounding rect
+  const boardS = Math.max(12, cellSize);
+  const dockS = Math.max(12, Math.min(cellSize * 0.55, 28));
+  const s = isDragging ? boardS : dockS;
+  const gap = Math.max(1, s * 0.03);
+
+  const wrapperStyle = isDragging
+    ? { transform: `translate(${transform?.x ?? 0}px, ${transform?.y ?? 0}px)`, zIndex: 50 }
+    : undefined;
 
   return (
     <div
@@ -26,9 +30,9 @@ function DockBlock({ block, index, cellSize }: { block: BlockShape; index: numbe
       {...listeners}
       {...attributes}
       className={`touch-none rounded-lg p-2 bg-gray-800 cursor-grab active:cursor-grabbing ${
-        isDragging ? 'opacity-30' : 'hover:scale-105'
+        isDragging ? 'opacity-0' : 'hover:scale-105'
       }`}
-      style={style}
+      style={wrapperStyle}
     >
       <div
         className="grid"
