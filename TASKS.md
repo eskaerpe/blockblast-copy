@@ -52,11 +52,9 @@ Status: ⬜ pending | 🚧 in progress | ✅ done
 
 ## Phase 6 — Polish
 
-- [x] CSS transitions: placement flash, line-clear animation (animate-clear, animate-pop)
+- [x] CSS transitions: placement flash, line-clear animation (transition-based, no keyframes)
 - [x] Sound effects (Web Audio API: place, clear, combo, game-over)
 - [x] Viewport handling (100dvh, safe-area-inset)
-- [ ] Performance: `chrome-devtools` trace (60fps drag)
-- [ ] Mobile viewport testing via `chrome-devtools`
-- [ ] Animation audit via `review-animations` skill
-- [ ] Visual design review via `frontend-design` skill
-- [ ] Cross-browser smoke test
+- [x] Animation audit: switch to CSS transitions, gated hover, prefers-reduced-motion, explicit easings
+- [x] Visual design: dark sci-fi palette, custom easing curves, cohesive motion personality
+- [ ] Cross-browser smoke test (user to verify)

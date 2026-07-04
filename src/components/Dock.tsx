@@ -30,7 +30,7 @@ function DockBlock({ block, index, cellSize }: { block: BlockShape; index: numbe
       {...listeners}
       {...attributes}
       className={`touch-none rounded-lg p-2 bg-gray-800 cursor-grab active:cursor-grabbing ${
-        isDragging ? 'opacity-0' : 'hover:scale-105'
+        isDragging ? 'opacity-0' : 'hover-grow'
       }`}
       style={wrapperStyle}
     >

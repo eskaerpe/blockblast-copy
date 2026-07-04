@@ -20,8 +20,8 @@ function Cell({ row, col, color, clearing }: {
   return (
     <div
       ref={setNodeRef}
-      className={`aspect-square rounded-sm border border-board-border transition-colors duration-100 ${
-        clearing ? 'animate-clear' : ''
+      className={`aspect-square rounded-sm border border-board-border transition-colors duration-100 clear-cell ${
+        clearing ? 'clearing' : ''
       }`}
       style={{ background: bg }}
     />

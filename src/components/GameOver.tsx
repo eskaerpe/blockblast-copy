@@ -12,7 +12,7 @@ export function GameOver({ score, hiScore, onRestart }: GameOverProps) {
       <div className="bg-gray-900 rounded-2xl p-8 text-center shadow-2xl border border-gray-700 max-w-xs w-full mx-4">
         <h2 className="text-2xl font-bold mb-2">Game Over</h2>
         {isNewBest && (
-          <p className="text-yellow-400 font-bold text-sm mb-3 animate-bounce">New Best!</p>
+          <p className="text-yellow-400 font-bold text-sm mb-3 animate-pop">New Best!</p>
         )}
         <div className="flex justify-center gap-6 mb-6">
           <div>
@@ -26,7 +26,7 @@ export function GameOver({ score, hiScore, onRestart }: GameOverProps) {
         </div>
         <button
           onClick={onRestart}
-          className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl active:scale-95 transition-transform"
+          className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl active:scale-95 transition-transform duration-160 ease-out"
         >
           Play Again
         </button>

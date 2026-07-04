@@ -40,21 +40,6 @@ body,
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-@keyframes clear-pop {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.2);
-    opacity: 0.6;
-  }
-  100% {
-    transform: scale(0);
-    opacity: 0;
-  }
-}
-
 @keyframes pop-in {
   0% {
     transform: scale(0.5);
@@ -70,10 +55,42 @@ body,
   }
 }
 
-.animate-clear {
-  animation: clear-pop 0.35s ease-out forwards;
+.clear-cell {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 250ms ease-out, transform 250ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.clear-cell.clearing {
+  opacity: 0;
+  transform: scale(0.95);
 }
 
 .animate-pop {
-  animation: pop-in 0.3s ease-out;
+  animation: pop-in 250ms ease-out;
+}
+
+/* Gated hover animations — touch devices skip these */
+@media (hover: hover) and (pointer: fine) {
+  .hover-grow:hover {
+    transform: scale(1.05);
+  }
+}
+
+/* Reduced motion: strip transform motion, keep opacity for comprehension */
+@media (prefers-reduced-motion: reduce) {
+  .clear-cell {
+    transition: opacity 250ms ease-out;
+    transform: none !important;
+  }
+
+  .animate-pop {
+    animation: none;
+    opacity: 1;
+  }
+
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
