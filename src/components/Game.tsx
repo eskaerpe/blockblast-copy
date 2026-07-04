@@ -135,8 +135,8 @@ export function Game() {
       }
       const match = overId.match(/^cell-(\d+)-(\d+)$/);
       if (match) {
-        const col = parseInt(match[1], 10);
-        const row = parseInt(match[2], 10);
+        const row = parseInt(match[1], 10);
+        const col = parseInt(match[2], 10);
         setHoveredCell({ row, col });
       } else {
         setHoveredCell(null);
@@ -158,8 +158,8 @@ export function Game() {
       const match = overId.match(/^cell-(\d+)-(\d+)$/);
       if (!match) return;
 
-      const col = parseInt(match[1], 10);
-      const row = parseInt(match[2], 10);
+      const row = parseInt(match[1], 10);
+      const col = parseInt(match[2], 10);
       tryPlaceBlock(activeBlockIdx, row, col);
     },
     [activeBlockIdx, tryPlaceBlock]
