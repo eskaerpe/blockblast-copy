@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --board-bg: #1a1a2e;
+  --board-cell: #16213e;
+  --board-border: #0f3460;
+}
+
+.light {
+  --board-bg: #e8e8e8;
+  --board-cell: #ffffff;
+  --board-border: #cccccc;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  overscroll-behavior: none;
+}
+
+* {
+  user-select: none;
+  -webkit-user-select: none;
+}
