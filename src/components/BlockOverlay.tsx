@@ -12,14 +12,15 @@ export function BlockOverlay({ block, cellSize }: BlockOverlayProps) {
   const maxCol = Math.max(...block.cells.map((c) => c.col));
   const rows = maxRow - minRow + 1;
   const cols = maxCol - minCol + 1;
-  const gap = Math.max(1, cellSize * 0.04);
+  const s = Math.max(12, cellSize);
+  const gap = Math.max(1, s * 0.04);
 
   return (
     <div
       className="grid opacity-90 pointer-events-none"
       style={{
-        gridTemplateColumns: `repeat(${cols}, ${cellSize}px)`,
-        gridTemplateRows: `repeat(${rows}, ${cellSize}px)`,
+        gridTemplateColumns: `repeat(${cols}, ${s}px)`,
+        gridTemplateRows: `repeat(${rows}, ${s}px)`,
         gap: `${gap}px`,
       }}
     >
@@ -32,9 +33,9 @@ export function BlockOverlay({ block, cellSize }: BlockOverlayProps) {
             <div
               key={`${r}-${c}`}
               className="rounded-sm"
-              style={{
-                width: `${cellSize}px`,
-                height: `${cellSize}px`,
+                style={{
+                    width: `${s}px`,
+                    height: `${s}px`,
                 background: occupied ? block.color : 'transparent',
               }}
             />
