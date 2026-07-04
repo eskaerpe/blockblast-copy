@@ -9,6 +9,7 @@ import {
   type DragStartEvent,
   type DragEndEvent,
   type DragOverEvent,
+  type DragCancelEvent,
 } from '@dnd-kit/core';
 import { Board } from './Board';
 import { Dock } from './Dock';
@@ -19,10 +20,12 @@ import { useGameStore } from '../store/gameStore';
 import { useSound } from '../hooks/useSound';
 import type { BlockShape } from '../game/types';
 
+function resetDrag() {
+  return { activeBlock: null as BlockShape | null, activeBlockIdx: -1, hoveredCell: null as { row: number; col: number } | null, isDragging: false };
+}
+
 export function Game() {
-  const [activeBlock, setActiveBlock] = useState<BlockShape | null>(null);
-  const [activeBlockIdx, setActiveBlockIdx] = useState<number>(-1);
-  const [hoveredCell, setHoveredCell] = useState<{ row: number; col: number } | null>(null);
+  const [drag, setDrag] = useState(resetDrag());
   const [cellSize, setCellSize] = useState(40);
   const boardContainerRef = useRef<HTMLDivElement>(null);
 
@@ -49,7 +52,6 @@ export function Game() {
     init();
   }, [init]);
 
-  // Measure board cell size
   useEffect(() => {
     const el = boardContainerRef.current;
     if (!el) return;
@@ -63,7 +65,6 @@ export function Game() {
     return () => observer.disconnect();
   }, []);
 
-  // Sound effects
   useEffect(() => {
     if (score !== prevScoreRef.current) {
       if (lastClearCount > 0) {
@@ -86,7 +87,6 @@ export function Game() {
     prevGameOverRef.current = gameOver;
   }, [gameOver, playGameOver]);
 
-  // Clear line animation state after it plays
   const [clearingCells, setClearingCells] = useState<Set<string>>(new Set());
   useEffect(() => {
     if (clearedLines) {
@@ -119,40 +119,44 @@ export function Game() {
   const handleDragStart = useCallback(
     (event: DragStartEvent) => {
       const { block, index } = event.active.data.current as { block: BlockShape; index: number };
-      setActiveBlock(block);
-      setActiveBlockIdx(index);
+      setDrag({ activeBlock: block, activeBlockIdx: index, hoveredCell: null, isDragging: true });
     },
     []
   );
 
   const handleDragOver = useCallback(
     (event: DragOverEvent) => {
+      const { activeBlock } = drag;
       if (!activeBlock) return;
       const overId = event.over ? String(event.over.id) : null;
       if (!overId) {
-        setHoveredCell(null);
+        setDrag((d) => ({ ...d, hoveredCell: null }));
         return;
       }
       const match = overId.match(/^cell-(\d+)-(\d+)$/);
       if (match) {
         const row = parseInt(match[1], 10);
         const col = parseInt(match[2], 10);
-        setHoveredCell({ row, col });
+        setDrag((d) => ({ ...d, hoveredCell: { row, col } }));
       } else {
-        setHoveredCell(null);
+        setDrag((d) => ({ ...d, hoveredCell: null }));
       }
     },
-    [activeBlock]
+    [drag]
   );
+
+  const endDrag = useCallback(() => {
+    setDrag(resetDrag());
+  }, []);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
       const { over } = event;
-      setActiveBlock(null);
-      setActiveBlockIdx(-1);
-      setHoveredCell(null);
+      const blockIdx = drag.activeBlockIdx;
 
-      if (!over || activeBlockIdx < 0) return;
+      endDrag();
+
+      if (!over || blockIdx < 0) return;
 
       const overId = String(over.id);
       const match = overId.match(/^cell-(\d+)-(\d+)$/);
@@ -160,14 +164,20 @@ export function Game() {
 
       const row = parseInt(match[1], 10);
       const col = parseInt(match[2], 10);
-      tryPlaceBlock(activeBlockIdx, row, col);
+      tryPlaceBlock(blockIdx, row, col);
     },
-    [activeBlockIdx, tryPlaceBlock]
+    [drag.activeBlockIdx, tryPlaceBlock, endDrag]
+  );
+
+  const handleDragCancel = useCallback(
+    (_event: DragCancelEvent) => {
+      endDrag();
+    },
+    [endDrag]
   );
 
   return (
     <div className="relative h-full flex flex-col items-center justify-between p-4 safe-top safe-bottom">
-      {/* Header */}
       <div className="flex items-center justify-between w-full max-w-md px-2">
         <div className="text-sm">
           <span className="text-gray-400">Score</span>
@@ -179,31 +189,37 @@ export function Game() {
         </div>
       </div>
 
-      {/* Combo indicator */}
       {combo > 1 && (
         <div key={combo} className="text-orange-400 font-bold text-sm animate-pop">
           Combo x{combo}
         </div>
       )}
 
-      {/* Board */}
-      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
+      <DndContext
+        sensors={sensors}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
+      >
         <div data-board ref={boardContainerRef}>
-          <Board board={board} hoveredCell={hoveredCell} activeBlock={activeBlock} clearingCells={clearingCells} />
+          <Board
+            board={board}
+            hoveredCell={drag.isDragging ? drag.hoveredCell : null}
+            activeBlock={drag.isDragging ? drag.activeBlock : null}
+            clearingCells={clearingCells}
+          />
         </div>
 
-        {/* Dock */}
         <Dock dock={dock} cellSize={cellSize} />
 
         <DragOverlay dropAnimation={null}>
-          {activeBlock ? <BlockOverlay block={activeBlock} cellSize={cellSize} /> : null}
+          {drag.activeBlock ? <BlockOverlay block={drag.activeBlock} cellSize={cellSize} /> : null}
         </DragOverlay>
       </DndContext>
 
-      {/* Settings */}
       <Settings />
 
-      {/* Game Over overlay */}
       {gameOver && <GameOver score={score} hiScore={hiScore} onRestart={restart} />}
     </div>
   );

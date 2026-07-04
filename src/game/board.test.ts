@@ -125,8 +125,88 @@ describe('clearLines', () => {
     const result = clearLines(board, lines);
     for (let c = 0; c < BOARD_SIZE; c++) expect(result[0][c]).toBe(0);
     for (let r = 0; r < BOARD_SIZE; r++) expect(result[r][0]).toBe(0);
-    // Row 1 was not cleared
     expect(result[1][1]).toBe('#bbb');
+  });
+
+  it('clears intersection cell only once', () => {
+    const board = createEmptyBoard();
+    for (let i = 0; i < BOARD_SIZE; i++) {
+      board[0][i] = '#fff';
+      board[i][0] = '#aaa';
+    }
+    const lines = { rows: [0], cols: [0] };
+    const result = clearLines(board, lines);
+    expect(result[0][0]).toBe(0);
+    for (let c = 1; c < BOARD_SIZE; c++) expect(result[0][c]).toBe(0);
+    for (let r = 1; r < BOARD_SIZE; r++) expect(result[r][0]).toBe(0);
+    expect(result[1][1]).toBe(0);
+  });
+});
+
+describe('E2E: placement → clearing', () => {
+  it('places blocks to fill row 6 and clears it', () => {
+    const board = createEmptyBoard();
+    // Fill row 6 (0-indexed, second from bottom) with individual dots
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      board[6][c] = '#ff0000';
+    }
+    const lines = findFullLines(board);
+    expect(lines.rows).toContain(6);
+    const cleared = clearLines(board, lines);
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      expect(cleared[6][c]).toBe(0);
+    }
+  });
+
+  it('places blocks to fill row and column simultaneously and clears both', () => {
+    const board = createEmptyBoard();
+    // Fill row 3 entirely
+    for (let c = 0; c < BOARD_SIZE; c++) board[3][c] = '#aaa';
+    // Fill column 4 entirely
+    for (let r = 0; r < BOARD_SIZE; r++) board[r][4] = '#bbb';
+
+    const lines = findFullLines(board);
+    expect(lines.rows).toContain(3);
+    expect(lines.cols).toContain(4);
+    const cleared = clearLines(board, lines);
+    for (let c = 0; c < BOARD_SIZE; c++) expect(cleared[3][c]).toBe(0);
+    for (let r = 0; r < BOARD_SIZE; r++) expect(cleared[r][4]).toBe(0);
+    // Cells NOT in cleared row/col should remain
+    expect(cleared[2][3]).toBe(0); // was already 0
+    expect(cleared[2][5]).toBe(0);
+  });
+
+  it('clears multiple full rows at once', () => {
+    const board = createEmptyBoard();
+    // Fill rows 0, 3, 7
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      board[0][c] = '#aaa';
+      board[3][c] = '#bbb';
+      board[7][c] = '#ccc';
+    }
+    const lines = findFullLines(board);
+    expect(lines.rows).toContain(0);
+    expect(lines.rows).toContain(3);
+    expect(lines.rows).toContain(7);
+    const cleared = clearLines(board, lines);
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      expect(cleared[0][c]).toBe(0);
+      expect(cleared[3][c]).toBe(0);
+      expect(cleared[7][c]).toBe(0);
+    }
+    // Row 1 should be untouched
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      expect(cleared[1][c]).toBe(0);
+    }
+  });
+
+  it('correctly finds full row at any index including boundaries', () => {
+    for (const testRow of [0, 1, 5, 6, 7]) {
+      const board = createEmptyBoard();
+      for (let c = 0; c < BOARD_SIZE; c++) board[testRow][c] = '#fff';
+      const lines = findFullLines(board);
+      expect(lines.rows).toEqual([testRow]);
+    }
   });
 });
 
