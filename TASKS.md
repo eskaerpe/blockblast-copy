@@ -6,24 +6,24 @@ Status: ⬜ pending | 🚧 in progress | ✅ done
 
 ## Phase 1 — Foundation
 
-- [ ] Scaffold Vite + React + TypeScript + Tailwind
-- [ ] Install Zustand, @dnd-kit, Vitest
-- [ ] Define game constants (`src/game/constants.ts`)
-- [ ] localStorage wrapper with fallback handling
-- [ ] Error boundary component
-- [ ] Dark/light theme system (CSS variables + Tailwind `dark` class)
+- [x] Scaffold Vite + React + TypeScript + Tailwind
+- [x] Install Zustand, @dnd-kit, Vitest
+- [x] Define game constants (`src/game/constants.ts`)
+- [x] localStorage wrapper with fallback handling
+- [x] Error boundary component
+- [x] Dark/light theme system (CSS variables + Tailwind `dark` class)
 
 ## Phase 2 — Core Board & Logic
 
-- [ ] Board grid type + Zustand store
-- [ ] Static polyomino shape definitions
-- [ ] Placement validator (`canPlaceBlock`)
-- [ ] `canPlaceBlock()` for game-over + dock fairness checks
-- [ ] Line clearing (rows + columns, simultaneous)
-- [ ] Scoring engine (cell points + line-clear bonus × combo)
-- [ ] Combo tracking (reset on non-clear)
-- [ ] Game-over detection
-- [ ] Unit tests: placement, clearing, scoring, game-over
+- [x] Board grid type + Zustand store
+- [x] Static polyomino shape definitions
+- [x] Placement validator (`canPlaceBlock`)
+- [x] `canPlaceBlock()` for game-over + dock fairness checks
+- [x] Line clearing (rows + columns, simultaneous)
+- [x] Scoring engine (cell points + line-clear bonus × combo)
+- [x] Combo tracking (reset on non-clear)
+- [x] Game-over detection
+- [x] Unit tests: placement, clearing, scoring, game-over (24 tests passing)
 
 ## Phase 3 — Dock & Block Generation
 
