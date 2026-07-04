@@ -203,7 +203,11 @@ export function Game() {
         onDragEnd={handleDragEnd}
         onDragCancel={handleDragCancel}
       >
-        <div data-board ref={boardContainerRef} key={boardVersion}>
+        <div
+          data-board
+          ref={boardContainerRef}
+          key={drag.isDragging ? 'dragging' : String(boardVersion)}
+        >
           <Board
             board={board}
             hoveredCell={drag.isDragging ? drag.hoveredCell : null}
