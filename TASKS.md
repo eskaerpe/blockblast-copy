@@ -27,28 +27,28 @@ Status: ⬜ pending | 🚧 in progress | ✅ done
 
 ## Phase 3 — Dock & Block Generation
 
-- [ ] Dock component (3 blocks)
-- [ ] Weighted random block generator
-- [ ] Dock fairness check (at least one block is placeable)
-- [ ] Dock refresh on all-3-placed
-- [ ] Edge case: board truly full
+- [x] Dock component (3 blocks)
+- [x] Weighted random block generator
+- [x] Dock fairness check (at least one block is placeable)
+- [x] Dock refresh on all-3-placed
+- [x] Edge case: board truly full
 
 ## Phase 4 — Drag & Drop
 
-- [ ] @dnd-kit DndContext + mouse + touch sensors
-- [ ] Dock blocks as `useDraggable`
-- [ ] Board cells as `useDroppable`
-- [ ] Drag overlay (block shape follows pointer)
-- [ ] Hover preview (valid/invalid highlight)
-- [ ] Invalid drop → block returns to dock
+- [x] @dnd-kit DndContext + mouse + touch sensors
+- [x] Dock blocks as `useDraggable`
+- [x] Board cells as `useDroppable`
+- [x] Drag overlay (block shape follows pointer)
+- [x] Hover preview (valid/invalid highlight)
+- [x] Invalid drop → block returns to dock
 
 ## Phase 5 — Game Flow & UI
 
-- [ ] Game-over overlay (final score, hi-score, restart)
-- [ ] Restart action
-- [ ] Settings panel (theme toggle, audio toggle)
-- [ ] Persist theme, audio, hi-score to localStorage
-- [ ] Responsive layout (mobile-first portrait)
+- [x] Game-over overlay (final score, hi-score, restart)
+- [x] Restart action
+- [x] Settings panel (theme toggle, audio toggle)
+- [x] Persist theme, audio, hi-score to localStorage
+- [x] Responsive layout (mobile-first portrait)
 
 ## Phase 6 — Polish
 

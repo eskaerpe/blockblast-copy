@@ -17,15 +17,25 @@
 html,
 body,
 #root {
+  height: 100dvh;
   height: 100%;
   margin: 0;
   padding: 0;
   -webkit-tap-highlight-color: transparent;
-  touch-action: none;
+  touch-action: manipulation;
   overscroll-behavior: none;
+  overflow: hidden;
 }
 
 * {
   user-select: none;
   -webkit-user-select: none;
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
