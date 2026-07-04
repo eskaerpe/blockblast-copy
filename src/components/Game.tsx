@@ -24,11 +24,22 @@ import type { BlockShape } from '../game/types';
 interface DragState {
   activeBlock: BlockShape | null;
   activeBlockIdx: number;
-  hoveredCell: { row: number; col: number } | null;
+  anchorCell: { row: number; col: number } | null;
   isDragging: boolean;
 }
 
-const EMPTY_DRAG: DragState = { activeBlock: null, activeBlockIdx: -1, hoveredCell: null, isDragging: false };
+const EMPTY_DRAG: DragState = { activeBlock: null, activeBlockIdx: -1, anchorCell: null, isDragging: false };
+
+function blockAnchorOffset(block: BlockShape): { row: number; col: number } {
+  const minRow = Math.min(...block.cells.map((c) => c.row));
+  const maxRow = Math.max(...block.cells.map((c) => c.row));
+  const minCol = Math.min(...block.cells.map((c) => c.col));
+  const maxCol = Math.max(...block.cells.map((c) => c.col));
+  return {
+    row: Math.floor((maxRow - minRow + 1) / 2),
+    col: Math.floor((maxCol - minCol + 1) / 2),
+  };
+}
 
 export function Game() {
   const [drag, setDrag] = useState<DragState>(EMPTY_DRAG);
@@ -73,7 +84,6 @@ export function Game() {
     return () => observer.disconnect();
   }, []);
 
-  // Kill ghost state on unmount
   useEffect(() => {
     return () => setDrag(EMPTY_DRAG);
   }, []);
@@ -144,7 +154,7 @@ export function Game() {
       const { block, index } = event.active.data.current as { block: BlockShape; index: number };
       const ae = event.activatorEvent as PointerEvent;
       dragPointerRef.current = { x: ae.clientX, y: ae.clientY };
-      setDrag({ activeBlock: block, activeBlockIdx: index, hoveredCell: null, isDragging: true });
+      setDrag({ activeBlock: block, activeBlockIdx: index, anchorCell: null, isDragging: true });
     },
     []
   );
@@ -158,7 +168,12 @@ export function Game() {
         y: dragPointerRef.current.y + event.delta.y,
       };
       const cell = cellFromPoint(dragPointerRef.current.x, dragPointerRef.current.y);
-      setDrag((d) => ({ ...d, hoveredCell: cell }));
+      if (cell) {
+        const off = blockAnchorOffset(activeBlock);
+        setDrag((d) => ({ ...d, anchorCell: { row: cell.row - off.row, col: cell.col - off.col } }));
+      } else {
+        setDrag((d) => ({ ...d, anchorCell: null }));
+      }
     },
     [drag, cellFromPoint]
   );
@@ -169,18 +184,25 @@ export function Game() {
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
-      const { over } = event;
+      const block = drag.activeBlock;
       const blockIdx = drag.activeBlockIdx;
+      const { over } = event;
       endDrag();
-      if (!over || blockIdx < 0) return;
+
+      if (!over || blockIdx < 0 || !block) return;
       const overId = String(over.id);
       const match = overId.match(/^cell-(\d+)-(\d+)$/);
       if (!match) return;
-      const row = parseInt(match[1], 10);
-      const col = parseInt(match[2], 10);
+
+      // Center the drop on the cursor just like the preview
+      const cellRow = parseInt(match[1], 10);
+      const cellCol = parseInt(match[2], 10);
+      const off = blockAnchorOffset(block);
+      const row = cellRow - off.row;
+      const col = cellCol - off.col;
       tryPlaceBlock(blockIdx, row, col);
     },
-    [drag.activeBlockIdx, tryPlaceBlock, endDrag]
+    [drag.activeBlockIdx, drag.activeBlock, tryPlaceBlock, endDrag]
   );
 
   const handleDragCancel = useCallback(
@@ -190,7 +212,7 @@ export function Game() {
     [endDrag]
   );
 
-  const showPreview = drag.isDragging && drag.hoveredCell && drag.activeBlock;
+  const showPreview = drag.isDragging && drag.anchorCell && drag.activeBlock;
 
   return (
     <div className="relative h-full flex flex-col items-center justify-between p-4 safe-top safe-bottom">
@@ -218,17 +240,14 @@ export function Game() {
         onDragEnd={handleDragEnd}
         onDragCancel={handleDragCancel}
       >
-        {/* Z-layer 1: board container (board cells + preview overlay) */}
-        <div className="relative" data-board ref={boardContainerRef} key={drag.isDragging ? 'dragging' : String(boardVersion)}>
-          {/* Z-layer 1a: board cells */}
+        <div className="relative" data-board ref={boardContainerRef} key={String(boardVersion)}>
           <Board board={board} clearingCells={clearingCells} />
 
-          {/* Z-layer 1b: preview overlay drawn ON TOP of board cells */}
           {showPreview && (
             <PreviewOverlay
               board={board}
               block={drag.activeBlock!}
-              cell={drag.hoveredCell!}
+              cell={drag.anchorCell!}
               cellSize={cellSize}
             />
           )}
@@ -237,7 +256,11 @@ export function Game() {
         <Dock dock={dock} cellSize={cellSize} />
 
         <DragOverlay dropAnimation={null}>
-          {drag.activeBlock ? <BlockOverlay block={drag.activeBlock} cellSize={Math.max(12, cellSize)} /> : null}
+          {drag.activeBlock ? (
+            <div style={{ transform: 'translate(-50%, -50%)' }}>
+              <BlockOverlay block={drag.activeBlock} cellSize={Math.max(12, cellSize)} />
+            </div>
+          ) : null}
         </DragOverlay>
       </DndContext>
 
