@@ -30,6 +30,7 @@ export function Game() {
   const boardContainerRef = useRef<HTMLDivElement>(null);
 
   const board = useGameStore((s) => s.board);
+  const boardVersion = useGameStore((s) => s.boardVersion);
   const dock = useGameStore((s) => s.dock);
   const score = useGameStore((s) => s.score);
   const hiScore = useGameStore((s) => s.hiScore);
@@ -202,12 +203,13 @@ export function Game() {
         onDragEnd={handleDragEnd}
         onDragCancel={handleDragCancel}
       >
-        <div data-board ref={boardContainerRef}>
+        <div data-board ref={boardContainerRef} key={boardVersion}>
           <Board
             board={board}
             hoveredCell={drag.isDragging ? drag.hoveredCell : null}
             activeBlock={drag.isDragging ? drag.activeBlock : null}
             clearingCells={clearingCells}
+            isDragging={drag.isDragging}
           />
         </div>
 

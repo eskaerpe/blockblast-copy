@@ -14,6 +14,7 @@ interface GameStore {
   gameOver: boolean;
   lastClearCount: number;
   clearedLines: { rows: number[]; cols: number[] } | null;
+  boardVersion: number;
 
   init: () => void;
   restart: () => void;
@@ -79,12 +80,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
   gameOver: false,
   lastClearCount: 0,
   clearedLines: null,
+  boardVersion: 0,
 
   init: () => {
     const board = createEmptyBoard();
     const dock = generateFairDock(board);
     const hiScore = loadJSON('hiscore', 0);
-    set({ board, dock, score: 0, combo: 1, gameOver: false, hiScore, lastClearCount: 0, clearedLines: null });
+    const v = get().boardVersion + 1;
+    set({ board, dock, score: 0, combo: 1, gameOver: false, hiScore, lastClearCount: 0, clearedLines: null, boardVersion: v });
   },
 
   restart: () => {
@@ -134,6 +137,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       gameOver,
       lastClearCount: lineCount,
       clearedLines: lineCount > 0 ? lines : null,
+      boardVersion: state.boardVersion + 1,
     });
 
     return true;
