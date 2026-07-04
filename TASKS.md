@@ -52,9 +52,9 @@ Status: ⬜ pending | 🚧 in progress | ✅ done
 
 ## Phase 6 — Polish
 
-- [ ] CSS transitions: placement flash, line-clear animation
-- [ ] Sound effects (Web Audio API)
-- [ ] Viewport handling (mobile address bar resize)
+- [x] CSS transitions: placement flash, line-clear animation (animate-clear, animate-pop)
+- [x] Sound effects (Web Audio API: place, clear, combo, game-over)
+- [x] Viewport handling (100dvh, safe-area-inset)
 - [ ] Performance: `chrome-devtools` trace (60fps drag)
 - [ ] Mobile viewport testing via `chrome-devtools`
 - [ ] Animation audit via `review-animations` skill

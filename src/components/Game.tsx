@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import {
   DndContext,
   DragOverlay,
@@ -16,6 +16,7 @@ import { BlockOverlay } from './BlockOverlay';
 import { Settings } from './Settings';
 import { GameOver } from './GameOver';
 import { useGameStore } from '../store/gameStore';
+import { useSound } from '../hooks/useSound';
 import type { BlockShape } from '../game/types';
 
 export function Game() {
@@ -29,13 +30,65 @@ export function Game() {
   const hiScore = useGameStore((s) => s.hiScore);
   const gameOver = useGameStore((s) => s.gameOver);
   const combo = useGameStore((s) => s.combo);
+  const lastClearCount = useGameStore((s) => s.lastClearCount);
+  const clearedLines = useGameStore((s) => s.clearedLines);
+  const clearClearedLines = useGameStore((s) => s.clearClearedLines);
   const init = useGameStore((s) => s.init);
   const restart = useGameStore((s) => s.restart);
   const tryPlaceBlock = useGameStore((s) => s.tryPlaceBlock);
 
+  const { playPlace, playClear, playCombo, playGameOver } = useSound();
+
+  const prevScoreRef = useRef(score);
+  const prevComboRef = useRef(combo);
+  const prevGameOverRef = useRef(gameOver);
+
   useEffect(() => {
     init();
   }, [init]);
+
+  // Sound effects
+  useEffect(() => {
+    if (score !== prevScoreRef.current) {
+      if (lastClearCount > 0) {
+        playClear(lastClearCount);
+        if (combo > prevComboRef.current) {
+          playCombo(combo);
+        }
+      } else {
+        playPlace();
+      }
+    }
+    prevScoreRef.current = score;
+    prevComboRef.current = combo;
+  }, [score, combo, lastClearCount, playPlace, playClear, playCombo]);
+
+  useEffect(() => {
+    if (gameOver && !prevGameOverRef.current) {
+      playGameOver();
+    }
+    prevGameOverRef.current = gameOver;
+  }, [gameOver, playGameOver]);
+
+  // Clear line animation state after it plays
+  const [clearingCells, setClearingCells] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    if (clearedLines) {
+      const cells = new Set<string>();
+      for (const r of clearedLines.rows) {
+        for (let c = 0; c < 8; c++) cells.add(`${r},${c}`);
+      }
+      for (const c of clearedLines.cols) {
+        for (let r = 0; r < 8; r++) cells.add(`${r},${c}`);
+      }
+      setClearingCells(cells);
+      const timer = setTimeout(() => {
+        setClearingCells(new Set());
+        clearClearedLines();
+      }, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [clearedLines, clearClearedLines]);
 
   const mouseSensor = useSensor(MouseSensor, {
     activationConstraint: { distance: 8 },
@@ -97,7 +150,7 @@ export function Game() {
   );
 
   return (
-    <div className="h-full flex flex-col items-center justify-between p-4 safe-top safe-bottom">
+    <div className="relative h-full flex flex-col items-center justify-between p-4 safe-top safe-bottom">
       {/* Header */}
       <div className="flex items-center justify-between w-full max-w-md px-2">
         <div className="text-sm">
@@ -112,7 +165,7 @@ export function Game() {
 
       {/* Combo indicator */}
       {combo > 1 && (
-        <div className="text-orange-400 font-bold text-sm animate-pulse">
+        <div key={combo} className="text-orange-400 font-bold text-sm animate-pop">
           Combo x{combo}
         </div>
       )}
@@ -120,7 +173,7 @@ export function Game() {
       {/* Board */}
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
         <div data-board>
-          <Board board={board} hoveredCell={hoveredCell} activeBlock={activeBlock} />
+          <Board board={board} hoveredCell={hoveredCell} activeBlock={activeBlock} clearingCells={clearingCells} />
         </div>
 
         {/* Dock */}

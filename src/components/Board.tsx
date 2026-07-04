@@ -7,18 +7,20 @@ interface BoardProps {
   board: BoardType;
   hoveredCell: { row: number; col: number } | null;
   activeBlock: BlockShape | null;
+  clearingCells: Set<string>;
 }
 
-function Cell({ row, col, color, isValid, isHovered }: {
+function Cell({ row, col, color, isValid, isHovered, clearing }: {
   row: number;
   col: number;
   color: string;
   isValid: boolean;
   isHovered: boolean;
+  clearing: boolean;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: `cell-${row}-${col}` });
 
-  const occupied = color !== '0';
+  const occupied = color !== '0' && !clearing;
   const highlight = isHovered && !occupied;
 
   const bg = occupied
@@ -36,13 +38,15 @@ function Cell({ row, col, color, isValid, isHovered }: {
   return (
     <div
       ref={setNodeRef}
-      className={`aspect-square rounded-sm border ${borderColor} transition-colors duration-100`}
+      className={`aspect-square rounded-sm border ${borderColor} transition-colors duration-100 ${
+        clearing ? 'animate-clear' : ''
+      }`}
       style={{ background: bg }}
     />
   );
 }
 
-export function Board({ board, hoveredCell, activeBlock }: BoardProps) {
+export function Board({ board, hoveredCell, activeBlock, clearingCells }: BoardProps) {
   // compute which cells would be occupied by the active block at the hovered position
   const previewCells = new Set<string>();
   let previewValid = false;
@@ -77,6 +81,7 @@ export function Board({ board, hoveredCell, activeBlock }: BoardProps) {
             color={String(cell)}
             isValid={previewValid}
             isHovered={previewCells.has(`${r},${c}`)}
+            clearing={clearingCells.has(`${r},${c}`)}
           />
         ))
       )}

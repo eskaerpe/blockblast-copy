@@ -9,3 +9,10 @@ Thumbs.db
 .vscode/
 .idea/
 *.tsbuildinfo
+
+# opencode config (non-project-specific)
+.opencode/
+opencode.jsonc
+skills-lock.json
+AGENTS.md
+opencode-project-guide/

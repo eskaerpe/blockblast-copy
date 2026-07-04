@@ -12,11 +12,14 @@ interface GameStore {
   hiScore: number;
   combo: number;
   gameOver: boolean;
+  lastClearCount: number;
+  clearedLines: { rows: number[]; cols: number[] } | null;
 
   init: () => void;
   restart: () => void;
   tryPlaceBlock: (blockIdx: number, row: number, col: number) => boolean;
   getPlaceablePositions: () => { blockIdx: number; positions: { row: number; col: number }[] }[];
+  clearClearedLines: () => void;
 }
 
 function generateDock(board: ReturnType<typeof createEmptyBoard>): BlockShape[] {
@@ -74,12 +77,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
   hiScore: loadJSON('hiscore', 0),
   combo: 1,
   gameOver: false,
+  lastClearCount: 0,
+  clearedLines: null,
 
   init: () => {
     const board = createEmptyBoard();
     const dock = generateFairDock(board);
     const hiScore = loadJSON('hiscore', 0);
-    set({ board, dock, score: 0, combo: 1, gameOver: false, hiScore });
+    set({ board, dock, score: 0, combo: 1, gameOver: false, hiScore, lastClearCount: 0, clearedLines: null });
   },
 
   restart: () => {
@@ -127,10 +132,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       hiScore,
       combo,
       gameOver,
+      lastClearCount: lineCount,
+      clearedLines: lineCount > 0 ? lines : null,
     });
 
     return true;
   },
+
+  clearClearedLines: () => set({ clearedLines: null }),
 
   getPlaceablePositions: () => {
     const state = get();
